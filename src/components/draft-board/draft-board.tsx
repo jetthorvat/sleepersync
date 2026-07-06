@@ -53,8 +53,7 @@ function PickCell({
       <div className="flex items-start justify-between gap-0.5">
         <span
           className={cn(
-            "font-mono leading-tight",
-            isPositionCoded ? "opacity-70" : "text-muted-foreground",
+            "font-mono leading-tight text-muted-foreground",
             compact ? "text-[7px]" : "text-[9px]",
           )}
         >
@@ -64,27 +63,19 @@ function PickCell({
         </span>
       </div>
       {name ? (
-        <p className={cn("truncate font-medium leading-tight", compact && "text-[9px]")}>{name}</p>
-      ) : (
         <p
           className={cn(
-            "truncate",
-            isPositionCoded ? "opacity-80" : "text-muted-foreground",
+            "truncate font-medium leading-tight text-foreground",
             compact && "text-[9px]",
           )}
         >
-          {isCurrent ? "Picking..." : "—"}
+          {name}
         </p>
-      )}
+      ) : isCurrent ? (
+        <p className={cn("truncate text-foreground", compact && "text-[9px]")}>Picking...</p>
+      ) : null}
       {!compact && (
-        <p
-          className={cn(
-            "truncate text-[10px]",
-            isPositionCoded ? "opacity-70" : "text-muted-foreground",
-          )}
-        >
-          {managerName}
-        </p>
+        <p className="truncate text-[10px] text-muted-foreground">{managerName}</p>
       )}
     </div>
   );
