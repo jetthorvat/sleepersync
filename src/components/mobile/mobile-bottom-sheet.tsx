@@ -67,17 +67,17 @@ export function MobileBottomSheet({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col pt-3 md:hidden">
-      <div className={cn("flex h-10 shrink-0 items-center border-b border-border", PANEL_INSET)}>
-        <div className="flex w-full">
+      <div className={cn("shrink-0 border-b border-border py-2", PANEL_INSET)}>
+        <div className="flex rounded-lg bg-muted/50 p-0.5 shadow-inner">
           {MOBILE_TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setMobileTab(tab.id)}
               className={cn(
-                "flex-1 text-xs font-medium transition-colors",
+                "flex-1 rounded-md px-1.5 py-1.5 text-xs font-medium transition-all",
                 mobileTab === tab.id
-                  ? "border-b-2 border-primary text-foreground"
+                  ? "bg-card text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
