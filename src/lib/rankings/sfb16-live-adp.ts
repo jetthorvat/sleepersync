@@ -29,8 +29,12 @@ export function isSfb16LiveAdpImport(fileName: string | undefined | null): boole
   return fileName === SFB16_LIVE_ADP_NAME;
 }
 
-export async function fetchSfb16LiveAdpCsv(): Promise<string> {
-  const response = await fetch(SFB16_LIVE_ADP_API_PATH);
+export async function fetchSfb16LiveAdpCsv(options?: { forceRefresh?: boolean }): Promise<string> {
+  const forceRefresh = options?.forceRefresh ?? false;
+  const url = forceRefresh
+    ? `${SFB16_LIVE_ADP_API_PATH}?refresh=1&t=${Date.now()}`
+    : SFB16_LIVE_ADP_API_PATH;
+  const response = await fetch(url, forceRefresh ? { cache: "no-store" } : undefined);
   if (!response.ok) {
     throw new Error("Could not load SFB16 live ADP data.");
   }
@@ -39,12 +43,17 @@ export async function fetchSfb16LiveAdpCsv(): Promise<string> {
 
 export async function importSfb16LiveAdpToDraft(
   draftId: string,
-  sourceType: RankingSet["sourceType"] = "google_sheet",
+  options?: { forceRefresh?: boolean; sourceType?: RankingSet["sourceType"] },
 ): Promise<void> {
-  const text = await fetchSfb16LiveAdpCsv();
+  const text = await fetchSfb16LiveAdpCsv({ forceRefresh: options?.forceRefresh ?? true });
   const parsed = parseDelimitedImport(text);
   if ("error" in parsed) {
     throw new Error(parsed.error);
   }
-  await saveDraftRankingImport(draftId, SFB16_LIVE_ADP_NAME, parsed.players, sourceType);
+  await saveDraftRankingImport(
+    draftId,
+    SFB16_LIVE_ADP_NAME,
+    parsed.players,
+    options?.sourceType ?? "google_sheet",
+  );
 }
