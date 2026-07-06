@@ -196,6 +196,29 @@ function normalizeRoster(raw: RawSleeperRoster): SleeperRoster {
   };
 }
 
+function normalizePickMetadata(
+  raw: Record<string, string | number | undefined>,
+): SleeperPick["metadata"] {
+  const firstName = raw.first_name ?? raw.firstName;
+  const lastName = raw.last_name ?? raw.lastName;
+  const fullName = raw.full_name ?? raw.fullName;
+
+  return {
+    ...raw,
+    firstName: firstName != null ? String(firstName) : undefined,
+    lastName: lastName != null ? String(lastName) : undefined,
+    fullName: fullName != null ? String(fullName) : undefined,
+    position: raw.position != null ? String(raw.position) : undefined,
+    team: raw.team != null ? String(raw.team) : undefined,
+    yearsExp:
+      raw.years_exp != null
+        ? Number(raw.years_exp)
+        : raw.yearsExp != null
+          ? Number(raw.yearsExp)
+          : undefined,
+  };
+}
+
 function normalizePick(raw: RawSleeperPick): SleeperPick {
   return {
     pickNo: raw.pick_no,
@@ -204,7 +227,7 @@ function normalizePick(raw: RawSleeperPick): SleeperPick {
     playerId: raw.player_id,
     pickedBy: raw.picked_by,
     rosterId: raw.roster_id,
-    metadata: raw.metadata ?? {},
+    metadata: normalizePickMetadata(raw.metadata ?? {}),
     isKeeper: raw.is_keeper ?? false,
     draftId: raw.draft_id,
   };
