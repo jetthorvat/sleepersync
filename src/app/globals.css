@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-pos-qb: var(--pos-qb);
+  --color-pos-rb: var(--pos-rb);
+  --color-pos-wr: var(--pos-wr);
+  --color-pos-te: var(--pos-te);
+  --color-pos-k: var(--pos-k);
+  --color-pos-dst: var(--pos-dst);
+  --color-pos-flex: var(--pos-flex);
+  --color-pos-sf: var(--pos-sf);
+  --color-pos-idp: var(--pos-idp);
+  --color-pick-current: var(--pick-current);
+  --color-pick-user: var(--pick-user);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: #0a0d12;
+  --foreground: #e8eaed;
+  --card: #12161d;
+  --card-foreground: #e8eaed;
+  --popover: #161b24;
+  --popover-foreground: #e8eaed;
+  --primary: #5b8def;
+  --primary-foreground: #ffffff;
+  --secondary: #1c2330;
+  --secondary-foreground: #c4cad4;
+  --muted: #1a2030;
+  --muted-foreground: #8b95a8;
+  --accent: #1e2738;
+  --accent-foreground: #e8eaed;
+  --destructive: #ef4444;
+  --border: #252d3d;
+  --input: #252d3d;
+  --ring: #5b8def;
+  --surface: #0e1218;
+  --surface-elevated: #161b24;
+  --pos-qb: #7c3aed;
+  --pos-rb: #059669;
+  --pos-wr: #2563eb;
+  --pos-te: #d97706;
+  --pos-k: #64748b;
+  --pos-dst: #475569;
+  --pos-flex: #0891b2;
+  --pos-sf: #db2777;
+  --pos-idp: #65a30d;
+  --pick-current: #f59e0b;
+  --pick-user: #5b8def;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+}
