@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ClipboardPaste, Pencil, Upload } from "lucide-react";
 import { ImportFormatHelp } from "@/components/import/import-format-help";
+import { PANEL_INSET } from "@/components/draft-room/resizable-left-panel";
 import {
   getRankingImportMeta,
   renameDraftRankingImport,
@@ -263,11 +264,11 @@ export function ImportDropZone({
 
   if (compact) {
     return (
-      <div className="border-b border-border px-3 py-2">
+      <div className={cn("border-b border-border py-3", PANEL_INSET)}>
         {hiddenPasteTarget}
         <div
           className={cn(
-            "flex items-start gap-2 rounded-md border border-dashed border-border/80 bg-surface/50 px-3 py-2 text-left transition-colors hover:border-primary/30",
+            "flex items-start gap-2 rounded-md border border-dashed border-border/80 bg-surface/50 px-3 py-2.5 text-left transition-colors hover:border-primary/30",
             isImporting && "opacity-60",
           )}
           onDragOver={handleDragOver}

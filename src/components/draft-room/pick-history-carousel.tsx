@@ -102,7 +102,7 @@ export function PickHistoryCarousel({ state }: PickHistoryCarouselProps) {
         </div>
       </div>
       <ScrollArea className="w-full whitespace-nowrap">
-        <div ref={scrollRef} className="flex gap-2 px-3 pb-3">
+        <div ref={scrollRef} className="flex gap-2 px-3 pb-3 pt-1">
           {tapeSlots.map((slot) => (
             <PickTapeCard key={slot.pickNo} slot={slot} draft={state.draft} />
           ))}

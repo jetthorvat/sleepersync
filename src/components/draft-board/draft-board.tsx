@@ -2,7 +2,7 @@
 
 import { Fragment } from "react";
 import { getBoardSlots, getManagerName, getSlotManagerName } from "@/lib/sleeper/draft-room";
-import { formatPickLabelFromDraft } from "@/lib/sleeper/pick-label";
+import { formatCompactBoardPickLabel, formatPickLabelFromDraft } from "@/lib/sleeper/pick-label";
 import { getPositionColorClass } from "@/lib/utils";
 import type { DraftRoomState, SleeperDraft, SleeperPick } from "@/types";
 import { cn } from "@/lib/utils";
@@ -55,7 +55,7 @@ function PickCell({
           )}
         >
           {compact
-            ? formatPickLabelFromDraft(draft, pickNo).split(" | ")[1]
+            ? formatCompactBoardPickLabel(draft, pickNo)
             : formatPickLabelFromDraft(draft, pickNo)}
         </span>
         {position && (

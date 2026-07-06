@@ -30,3 +30,9 @@ export function formatShortPickLabel(draft: SleeperDraft, overallPick: number): 
   const { round, pickInRound } = getPickRoundInfo(draft, overallPick);
   return `${round}.${String(pickInRound).padStart(2, "0")}`;
 }
+
+/** Compact board cell label, e.g. `#164 · 14.08`. */
+export function formatCompactBoardPickLabel(draft: SleeperDraft, overallPick: number): string {
+  const { round, pickInRound } = getPickRoundInfo(draft, overallPick);
+  return `#${overallPick} · ${round}.${String(pickInRound).padStart(2, "0")}`;
+}
