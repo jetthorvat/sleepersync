@@ -10,12 +10,10 @@ import {
   saveDraftRankingImport,
 } from "@/lib/db";
 import { formatImportTime } from "@/lib/sleeper/player-display";
+import { importSfb16LiveAdpToDraft } from "@/lib/rankings/sfb16-live-adp";
 import { parseDelimitedImport, parseImportFile } from "@/lib/rankings/parse-import";
 import type { RankingSet } from "@/types";
 import { cn } from "@/lib/utils";
-
-const SFB16_LIVE_ADP_PATH = "/data/sfb16-live-drafts-adp.csv";
-const SFB16_LIVE_ADP_NAME = "SFB16 Live Drafts ADP";
 
 interface ImportDropZoneProps {
   draftId: string;
@@ -95,16 +93,11 @@ export function ImportDropZone({
     setIsImporting(true);
     setError(null);
     try {
-      const response = await fetch(SFB16_LIVE_ADP_PATH);
-      if (!response.ok) {
-        setError("Could not load SFB16 live ADP data.");
-        return;
-      }
-      const text = await response.text();
-      const parsed = parseDelimitedImport(text);
-      await commitImport(SFB16_LIVE_ADP_NAME, "csv", parsed);
-    } catch {
-      setError("Could not load SFB16 live ADP data.");
+      await importSfb16LiveAdpToDraft(draftId);
+      await loadMeta();
+      onImportComplete?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load SFB16 live ADP data.");
     } finally {
       setIsImporting(false);
     }

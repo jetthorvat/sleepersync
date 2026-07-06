@@ -22,8 +22,13 @@ import {
   useSeasonByeWeeks,
   useSeasonProjections,
 } from "@/hooks/use-sleeper";
-import { getDraftRanking } from "@/lib/db";
+import { getDraftRanking, getRankingImportMeta } from "@/lib/db";
 import { buildDraftRoomState } from "@/lib/sleeper/draft-room";
+import {
+  importSfb16LiveAdpToDraft,
+  isSfb16LiveAdpImport,
+  SFB16_LIVE_ADP_REFRESH_MS,
+} from "@/lib/rankings/sfb16-live-adp";
 import { buildAvailablePlayerPool } from "@/lib/sleeper/player-pool";
 import { useDraftRoomStore } from "@/stores/draft-room-store";
 import type { RankingPlayer } from "@/types";
@@ -133,6 +138,33 @@ export function DraftRoom({ draftId }: DraftRoomProps) {
   const isPolling =
     draft?.status === "pre_draft" || draft?.status === "drafting" || draft?.status === "paused";
   const enrichmentLoading = projectionsLoading || byeWeeksLoading;
+
+  useEffect(() => {
+    if (!isPolling) return;
+
+    let cancelled = false;
+
+    const refreshSfb16IfActive = async () => {
+      const meta = await getRankingImportMeta(draftId);
+      if (!meta || !isSfb16LiveAdpImport(meta.fileName) || cancelled) return;
+
+      try {
+        await importSfb16LiveAdpToDraft(draftId);
+        if (!cancelled) refreshCustomRankings();
+      } catch {
+        // Silent — stale rankings are better than interrupting the draft UI.
+      }
+    };
+
+    const intervalId = window.setInterval(() => {
+      void refreshSfb16IfActive();
+    }, SFB16_LIVE_ADP_REFRESH_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [draftId, isPolling, refreshCustomRankings]);
 
   const handleRefresh = () => {
     refetchDraft();
