@@ -16,10 +16,12 @@ function readBundledCsv(): string {
   return readFileSync(filePath, "utf-8");
 }
 
-async function fetchSheetCsv(sheetUrl: string): Promise<string> {
+async function fetchSheetCsv(sheetUrl: string, forceRefresh = false): Promise<string> {
   const response = await fetch(sheetUrl, {
     headers: { Accept: "text/csv,text/plain,*/*" },
-    next: { revalidate: SFB16_LIVE_ADP_REVALIDATE_SECONDS },
+    ...(forceRefresh
+      ? { cache: "no-store" as RequestCache }
+      : { next: { revalidate: SFB16_LIVE_ADP_REVALIDATE_SECONDS } }),
   });
 
   if (!response.ok) {
@@ -29,11 +31,12 @@ async function fetchSheetCsv(sheetUrl: string): Promise<string> {
   return response.text();
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const sheetUrl = getSfb16LiveAdpSheetUrl();
+  const forceRefresh = new URL(request.url).searchParams.has("refresh");
 
   try {
-    const csv = await fetchSheetCsv(sheetUrl);
+    const csv = await fetchSheetCsv(sheetUrl, forceRefresh);
     return new NextResponse(csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",

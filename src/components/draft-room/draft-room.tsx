@@ -22,7 +22,7 @@ import {
   useSeasonByeWeeks,
   useSeasonProjections,
 } from "@/hooks/use-sleeper";
-import { getDraftRanking, getRankingImportMeta } from "@/lib/db";
+import { getDraftRanking, getDraftRankingAssociation, getRankingImportMeta } from "@/lib/db";
 import { buildDraftRoomState } from "@/lib/sleeper/draft-room";
 import {
   importSfb16LiveAdpToDraft,
@@ -64,6 +64,13 @@ export function DraftRoom({ draftId }: DraftRoomProps) {
   }, [draftId, resetDraftRoomUI]);
 
   const loadImportedRankings = useCallback(async () => {
+    const association = await getDraftRankingAssociation(draftId);
+    if (association?.useSleeperAdp) {
+      setImportedRankings(null);
+      setHasCustomRankings(false);
+      return;
+    }
+
     const draftRanking = await getDraftRanking(draftId);
     const players = draftRanking?.players ?? null;
     setImportedRankings(players);
@@ -149,7 +156,7 @@ export function DraftRoom({ draftId }: DraftRoomProps) {
       if (!meta || !isSfb16LiveAdpImport(meta.fileName) || cancelled) return;
 
       try {
-        await importSfb16LiveAdpToDraft(draftId);
+        await importSfb16LiveAdpToDraft(draftId, { forceRefresh: false });
         if (!cancelled) refreshCustomRankings();
       } catch {
         // Silent — stale rankings are better than interrupting the draft UI.

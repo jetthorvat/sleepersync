@@ -1,16 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ClipboardPaste, Pencil, Upload } from "lucide-react";
+import { ClipboardPaste, Pencil, Upload, X } from "lucide-react";
 import { ImportFormatHelp } from "@/components/import/import-format-help";
 import { PANEL_INSET } from "@/components/draft-room/resizable-left-panel";
 import {
+  clearDraftRankingImport,
   getRankingImportMeta,
   renameDraftRankingImport,
   saveDraftRankingImport,
 } from "@/lib/db";
 import { formatImportTime } from "@/lib/sleeper/player-display";
-import { importSfb16LiveAdpToDraft } from "@/lib/rankings/sfb16-live-adp";
+import {
+  importSfb16LiveAdpToDraft,
+  isSfb16LiveAdpImport,
+} from "@/lib/rankings/sfb16-live-adp";
 import { parseDelimitedImport, parseImportFile } from "@/lib/rankings/parse-import";
 import type { RankingSet } from "@/types";
 import { cn } from "@/lib/utils";
@@ -93,11 +97,25 @@ export function ImportDropZone({
     setIsImporting(true);
     setError(null);
     try {
-      await importSfb16LiveAdpToDraft(draftId);
+      await importSfb16LiveAdpToDraft(draftId, { forceRefresh: true });
       await loadMeta();
       onImportComplete?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load SFB16 live ADP data.");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleClearRankings = async () => {
+    setIsImporting(true);
+    setError(null);
+    try {
+      await clearDraftRankingImport(draftId);
+      setImportMeta(null);
+      onImportComplete?.();
+    } catch {
+      setError("Could not remove rankings. Try again.");
     } finally {
       setIsImporting(false);
     }
@@ -188,6 +206,12 @@ export function ImportDropZone({
     </div>
   );
 
+  const sfb16Label = importMeta
+    ? isSfb16LiveAdpImport(importMeta.fileName)
+      ? "Refresh SFB16 Live Drafts ADP from Google Sheet"
+      : "Switch to SFB16 Live Drafts ADP"
+    : "Click here to use the SFB16 Live Drafts ADP";
+
   const sfb16Button = (
     <button
       type="button"
@@ -198,7 +222,22 @@ export function ImportDropZone({
         compact ? "text-[10px]" : "text-xs",
       )}
     >
-      Click here to use the SFB16 Live Drafts ADP
+      {sfb16Label}
+    </button>
+  );
+
+  const clearRankingsButton = importMeta && (
+    <button
+      type="button"
+      onClick={() => void handleClearRankings()}
+      disabled={isImporting}
+      className={cn(
+        "inline-flex items-center gap-1 text-muted-foreground hover:text-foreground disabled:opacity-50",
+        compact ? "text-[10px]" : "text-xs",
+      )}
+    >
+      <X className="h-3 w-3" />
+      Use Sleeper rankings
     </button>
   );
 
@@ -285,6 +324,8 @@ export function ImportDropZone({
                 <p className="text-[10px] text-muted-foreground">
                   Drop or paste new rankings/projections to replace
                 </p>
+                {sfb16Button}
+                {clearRankingsButton}
               </>
             ) : (
               <p className="text-[10px] text-muted-foreground">
@@ -325,6 +366,10 @@ export function ImportDropZone({
           <p className="mt-1 max-w-[280px] text-xs text-muted-foreground">
             Drop or paste new rankings/projections to replace
           </p>
+          <div className="mt-2 flex flex-col items-center gap-1">
+            {sfb16Button}
+            {clearRankingsButton}
+          </div>
         </>
       ) : (
         <>

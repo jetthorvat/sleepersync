@@ -201,6 +201,23 @@ export async function saveDraftRankingImport(
   });
 }
 
+export async function clearDraftRankingImport(draftId: string): Promise<void> {
+  if (!db) return;
+
+  const draftRanking = await db.draftRankings.get(draftId);
+  if (draftRanking?.rankingSetId) {
+    await db.rankingSets.delete(draftRanking.rankingSetId);
+  }
+
+  await db.draftRankings.delete(draftId);
+  await db.rankingImportMeta.delete(draftId);
+  await db.draftRankingAssociations.put({
+    draftId,
+    rankingSetId: "",
+    useSleeperAdp: true,
+  });
+}
+
 export async function renameDraftRankingImport(draftId: string, displayName: string): Promise<void> {
   if (!db) return;
   const trimmed = displayName.trim();
