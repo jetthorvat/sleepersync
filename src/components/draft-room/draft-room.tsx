@@ -230,12 +230,7 @@ export function DraftRoom({ draftId }: DraftRoomProps) {
         </div>
       </div>
 
-      <div className="relative min-h-0 flex-1 overflow-hidden md:hidden">
-        <div className="absolute inset-0 pb-[55vh]">
-          <DraftBoard state={state} />
-        </div>
-        <MobileBottomSheet state={state} {...panelProps} />
-      </div>
+      <MobileBottomSheet state={state} {...panelProps} />
     </div>
   );
 }

@@ -16,7 +16,7 @@ interface DraftRoomUIState {
   sortDirection: SortDirection;
   leftPanelTab: LeftPanelTab;
   mobileSheetState: "collapsed" | "half" | "expanded";
-  mobileTab: "players" | "queue" | "team" | "settings";
+  mobileTab: "players" | "queue" | "board" | "team";
   setSearchQuery: (q: string) => void;
   setAvailableFilterPositions: (positions: string[]) => void;
   togglePositionFilter: (pos: string) => void;
@@ -25,7 +25,7 @@ interface DraftRoomUIState {
   setSortDirection: (d: SortDirection) => void;
   setLeftPanelTab: (tab: LeftPanelTab) => void;
   setMobileSheetState: (state: "collapsed" | "half" | "expanded") => void;
-  setMobileTab: (tab: "players" | "queue" | "team" | "settings") => void;
+  setMobileTab: (tab: "players" | "queue" | "board" | "team") => void;
   resetDraftRoomUI: () => void;
 }
 
