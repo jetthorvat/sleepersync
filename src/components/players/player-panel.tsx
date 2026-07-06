@@ -184,50 +184,60 @@ export function PlayerPanel({
   const positionsToShow =
     availableFilterPositions.length > 0 ? availableFilterPositions : filterPositions;
 
+  const leftPanelTabs = !hideTabs && (
+    <div className={cn("shrink-0 border-b border-border py-2", PANEL_INSET)}>
+      <div className="flex rounded-lg bg-muted/50 p-0.5 shadow-inner">
+        <button
+          type="button"
+          onClick={() => setLeftPanelTab("pool")}
+          className={cn(
+            "flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all",
+            tab === "pool"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          Player Pool
+        </button>
+        <button
+          type="button"
+          onClick={() => setLeftPanelTab("queue")}
+          className={cn(
+            "flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all",
+            tab === "queue"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          Queue{queue.length > 0 ? ` (${queue.length})` : ""}
+        </button>
+        <button
+          type="button"
+          onClick={() => setLeftPanelTab("team")}
+          className={cn(
+            "flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all",
+            tab === "team"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          Team
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       {!hideTabs && (
-        <div className={cn("shrink-0 border-b border-border py-2", PANEL_INSET)}>
-          <div className="flex rounded-lg bg-muted/50 p-0.5 shadow-inner">
-            <button
-              type="button"
-              onClick={() => setLeftPanelTab("pool")}
-              className={cn(
-                "flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all",
-                tab === "pool"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              Player Pool
-            </button>
-            <button
-              type="button"
-              onClick={() => setLeftPanelTab("queue")}
-              className={cn(
-                "flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all",
-                tab === "queue"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              Queue{queue.length > 0 ? ` (${queue.length})` : ""}
-            </button>
-            <button
-              type="button"
-              onClick={() => setLeftPanelTab("team")}
-              className={cn(
-                "flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all",
-                tab === "team"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              Team
-            </button>
-          </div>
-        </div>
+        <ImportDropZone
+          draftId={draftId}
+          compact
+          hasImport={hasCustomRankings}
+          onImportComplete={onImportComplete}
+        />
       )}
+      {leftPanelTabs}
 
       {tab === "queue" ? (
         <QueuePanel
@@ -243,12 +253,14 @@ export function PlayerPanel({
         )
       ) : (
         <>
-          <ImportDropZone
-            draftId={draftId}
-            compact
-            hasImport={hasCustomRankings}
-            onImportComplete={onImportComplete}
-          />
+          {hideTabs && (
+            <ImportDropZone
+              draftId={draftId}
+              compact
+              hasImport={hasCustomRankings}
+              onImportComplete={onImportComplete}
+            />
+          )}
 
           <div className={cn("shrink-0 space-y-2 border-b border-border py-3", PANEL_INSET)}>
             <div className="relative">

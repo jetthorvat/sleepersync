@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ClipboardPaste, Pencil, Upload, X } from "lucide-react";
+import { ClipboardPaste, Pencil, Trash2 } from "lucide-react";
 import { ImportFormatHelp } from "@/components/import/import-format-help";
 import { PANEL_INSET } from "@/components/draft-room/resizable-left-panel";
 import {
@@ -25,6 +25,9 @@ interface ImportDropZoneProps {
   hasImport?: boolean;
   onImportComplete?: () => void;
 }
+
+const IMPORT_ACTION_CLASS =
+  "flex flex-1 items-center justify-center gap-1 rounded-md border border-border bg-card px-2 py-1.5 text-[10px] font-medium text-foreground transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50";
 
 export function ImportDropZone({
   draftId,
@@ -171,99 +174,44 @@ export function ImportDropZone({
     onImportComplete?.();
   };
 
-  const renameControl = importMeta && (
-    <div className="flex min-w-0 items-center gap-1">
-      {isRenaming ? (
-        <input
-          autoFocus
-          value={editName}
-          onChange={(event) => setEditName(event.target.value)}
-          onBlur={() => void commitRename()}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") void commitRename();
-            if (event.key === "Escape") setIsRenaming(false);
-          }}
-          className={cn(
-            "min-w-0 flex-1 rounded border border-border bg-background px-1.5 py-0.5 font-medium outline-none focus:border-primary",
-            compact ? "text-[10px]" : "text-xs",
-          )}
-        />
-      ) : (
-        <>
-          <p className={cn("truncate font-medium", compact ? "text-[10px]" : "text-xs")}>
-            {importMeta.fileName}
-          </p>
-          <button
-            type="button"
-            onClick={startRename}
-            className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground"
-            aria-label="Rename import"
-          >
-            <Pencil className="h-3 w-3" />
-          </button>
-        </>
-      )}
-    </div>
-  );
-
   const sfb16Label = importMeta
     ? isSfb16LiveAdpImport(importMeta.fileName)
       ? "Refresh SFB16 Live Drafts ADP from Google Sheet"
       : "Switch to SFB16 Live Drafts ADP"
     : "Click here to use the SFB16 Live Drafts ADP";
 
-  const sfb16Button = (
-    <button
-      type="button"
-      onClick={() => void handleSfb16LiveAdp()}
-      disabled={isImporting}
-      className={cn(
-        "text-left text-primary hover:underline disabled:opacity-50",
-        compact ? "text-[10px]" : "text-xs",
-      )}
-    >
-      {sfb16Label}
-    </button>
+  const hiddenPasteTarget = (
+    <textarea
+      ref={pasteInputRef}
+      tabIndex={-1}
+      aria-hidden
+      className="pointer-events-none absolute h-0 w-0 opacity-0"
+      onPaste={handlePasteEvent}
+    />
   );
 
-  const clearRankingsButton = importMeta && (
-    <button
-      type="button"
-      onClick={() => void handleClearRankings()}
-      disabled={isImporting}
-      className={cn(
-        "inline-flex items-center gap-1 text-muted-foreground hover:text-foreground disabled:opacity-50",
-        compact ? "text-[10px]" : "text-xs",
-      )}
-    >
-      <X className="h-3 w-3" />
-      Use Sleeper rankings
-    </button>
+  const errorMessage = error && (
+    <p className={cn("text-destructive", compact ? "text-[10px]" : "text-xs")}>{error}</p>
   );
 
-  const actionButtons = (
-    <div className="flex shrink-0 items-center gap-2">
+  const headerRow = (
+    <div className="grid grid-cols-3 gap-1.5">
+      <div className="flex min-w-0 items-center gap-1">
+        <p className="truncate text-xs font-medium">
+          {importMeta ? "Current Rankings" : "Sleeper Default Rankings"}
+        </p>
+        <ImportFormatHelp compact />
+      </div>
       <button
         type="button"
         onClick={() => void handlePasteClick()}
         disabled={isImporting}
-        className={cn(
-          "text-primary hover:underline disabled:opacity-50",
-          compact ? "text-[10px]" : "text-xs",
-        )}
+        className={IMPORT_ACTION_CLASS}
       >
-        <span className="inline-flex items-center gap-1">
-          <ClipboardPaste className="h-3 w-3" />
-          Paste
-        </span>
+        <ClipboardPaste className="h-3 w-3" />
+        Paste
       </button>
-      <label
-        className={cn(
-          "cursor-pointer text-primary hover:underline",
-          compact ? "text-[10px]" : "text-xs",
-          isImporting && "pointer-events-none opacity-50",
-        )}
-      >
+      <label className={cn(IMPORT_ACTION_CLASS, isImporting && "pointer-events-none opacity-50")}>
         Browse
         <input
           type="file"
@@ -280,62 +228,74 @@ export function ImportDropZone({
     </div>
   );
 
-  const hiddenPasteTarget = (
-    <textarea
-      ref={pasteInputRef}
-      tabIndex={-1}
-      aria-hidden
-      className="pointer-events-none absolute h-0 w-0 opacity-0"
-      onPaste={handlePasteEvent}
-    />
-  );
-
-  const errorMessage = error && (
-    <p className={cn("text-destructive", compact ? "text-[10px]" : "text-xs")}>{error}</p>
-  );
-
   if (compact) {
     return (
-      <div className={cn("border-b border-border py-3", PANEL_INSET)}>
+      <div className={cn("shrink-0 border-b border-border py-3", PANEL_INSET)}>
         {hiddenPasteTarget}
         <div
           className={cn(
-            "flex items-start gap-2 rounded-md border border-dashed border-border/80 bg-surface/50 px-3 py-2.5 text-left transition-colors hover:border-primary/30",
+            "space-y-2 rounded-md border border-dashed border-border/80 bg-surface/50 px-3 py-2.5 text-left transition-colors hover:border-primary/30",
             isImporting && "opacity-60",
           )}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onPaste={handlePasteEvent}
         >
-          <Upload className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-          <div className="min-w-0 flex-1 space-y-0.5">
-            <div className="flex items-center gap-1">
-              <p className="text-xs font-medium">
-                {importMeta ? "Current Rankings" : "Drop or paste rankings"}
-              </p>
-              <ImportFormatHelp compact />
-            </div>
-            {importMeta ? (
-              <>
-                {renameControl}
-                <p className="text-[10px] text-muted-foreground">
-                  Imported {formatImportTime(importMeta.importedAt)}
-                </p>
-                <p className="text-[10px] text-muted-foreground">
-                  Drop or paste new rankings/projections to replace
-                </p>
-                {sfb16Button}
-                {clearRankingsButton}
-              </>
-            ) : (
+          {headerRow}
+          {importMeta && (
+            <div className="space-y-0.5">
+              <div className="flex min-w-0 items-center gap-1">
+                {isRenaming ? (
+                  <input
+                    autoFocus
+                    value={editName}
+                    onChange={(event) => setEditName(event.target.value)}
+                    onBlur={() => void commitRename()}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") void commitRename();
+                      if (event.key === "Escape") setIsRenaming(false);
+                    }}
+                    className="min-w-0 flex-1 rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium outline-none focus:border-primary"
+                  />
+                ) : (
+                  <>
+                    <p className="min-w-0 flex-1 truncate text-[10px] font-medium">
+                      {importMeta.fileName}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={startRename}
+                      className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground"
+                      aria-label="Rename import"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleClearRankings()}
+                      disabled={isImporting}
+                      className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive disabled:opacity-50"
+                      aria-label="Remove rankings and use Sleeper default"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </>
+                )}
+              </div>
               <p className="text-[10px] text-muted-foreground">
-                CSV file or copied table — column order does not matter
+                Imported {formatImportTime(importMeta.importedAt)}
               </p>
-            )}
-            {!importMeta && sfb16Button}
-            {errorMessage}
-          </div>
-          {actionButtons}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => void handleSfb16LiveAdp()}
+            disabled={isImporting}
+            className="text-left text-[10px] text-primary hover:underline disabled:opacity-50"
+          >
+            {sfb16Label}
+          </button>
+          {errorMessage}
         </div>
       </div>
     );
@@ -344,7 +304,7 @@ export function ImportDropZone({
   return (
     <div
       className={cn(
-        "relative m-3 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-surface p-6 text-center transition-colors hover:border-primary/40 hover:bg-accent/30",
+        "relative m-3 flex flex-col rounded-lg border-2 border-dashed border-border bg-surface p-6 text-center transition-colors hover:border-primary/40 hover:bg-accent/30",
         isImporting && "opacity-60",
       )}
       onDragOver={handleDragOver}
@@ -352,37 +312,61 @@ export function ImportDropZone({
       onPaste={handlePasteEvent}
     >
       {hiddenPasteTarget}
-      <div className="absolute right-3 top-3">
-        <ImportFormatHelp />
-      </div>
-      <Upload className="mb-3 h-8 w-8 text-muted-foreground" />
-      {importMeta ? (
-        <>
-          <p className="text-sm font-medium">Current Rankings</p>
-          <div className="mt-1 max-w-[280px]">{renameControl}</div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Imported {formatImportTime(importMeta.importedAt)}
-          </p>
-          <p className="mt-1 max-w-[280px] text-xs text-muted-foreground">
-            Drop or paste new rankings/projections to replace
-          </p>
-          <div className="mt-2 flex flex-col items-center gap-1">
-            {sfb16Button}
-            {clearRankingsButton}
+      <div className="mx-auto w-full max-w-sm space-y-3 text-left">
+        {headerRow}
+        {importMeta ? (
+          <div className="space-y-1">
+            <div className="flex min-w-0 items-center gap-1">
+              {isRenaming ? (
+                <input
+                  autoFocus
+                  value={editName}
+                  onChange={(event) => setEditName(event.target.value)}
+                  onBlur={() => void commitRename()}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") void commitRename();
+                    if (event.key === "Escape") setIsRenaming(false);
+                  }}
+                  className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-xs font-medium outline-none focus:border-primary"
+                />
+              ) : (
+                <>
+                  <p className="min-w-0 flex-1 truncate text-xs font-medium">{importMeta.fileName}</p>
+                  <button
+                    type="button"
+                    onClick={startRename}
+                    className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground"
+                    aria-label="Rename import"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleClearRankings()}
+                    disabled={isImporting}
+                    className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive disabled:opacity-50"
+                    aria-label="Remove rankings and use Sleeper default"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Imported {formatImportTime(importMeta.importedAt)}
+            </p>
           </div>
-        </>
-      ) : (
-        <>
-          <p className="text-sm font-medium">Drop or paste rankings</p>
-          <p className="mt-1 max-w-[280px] text-xs text-muted-foreground">
-            CSV export or a copied spreadsheet table. Headers are auto-detected — column order does
-            not matter.
-          </p>
-          <div className="mt-2">{sfb16Button}</div>
-        </>
-      )}
-      <div className="mt-3">{actionButtons}</div>
-      {errorMessage && <p className="mt-2 max-w-[280px] text-xs text-destructive">{error}</p>}
+        ) : null}
+        <button
+          type="button"
+          onClick={() => void handleSfb16LiveAdp()}
+          disabled={isImporting}
+          className="text-left text-xs text-primary hover:underline disabled:opacity-50"
+        >
+          {sfb16Label}
+        </button>
+        {errorMessage}
+      </div>
     </div>
   );
 }
