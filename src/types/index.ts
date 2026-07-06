@@ -77,6 +77,7 @@ export interface SleeperPick {
   metadata: {
     firstName?: string;
     lastName?: string;
+    fullName?: string;
     position?: string;
     team?: string;
     yearsExp?: number;

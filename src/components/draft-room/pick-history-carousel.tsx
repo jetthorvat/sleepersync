@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { buildPickTapeSlots } from "@/lib/sleeper/draft-room";
+import { getPickPlayerName } from "@/lib/sleeper/pick-player";
 import { formatPickLabelFromDraft } from "@/lib/sleeper/pick-label";
 import { getPositionColorClass } from "@/lib/utils";
 import type { DraftRoomState } from "@/types";
@@ -16,11 +17,7 @@ interface PickHistoryCarouselProps {
 function PickTapeCard({ slot, draft }: { slot: PickTapeSlot; draft: DraftRoomState["draft"] }) {
   const pick = slot.pick;
   const hasPlayer = pick?.playerId;
-
-  const name =
-    hasPlayer && pick.metadata.firstName && pick.metadata.lastName
-      ? `${pick.metadata.firstName} ${pick.metadata.lastName}`
-      : null;
+  const name = getPickPlayerName(pick);
   const position = pick?.metadata.position ? String(pick.metadata.position) : null;
 
   return (

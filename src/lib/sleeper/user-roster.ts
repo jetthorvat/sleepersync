@@ -1,3 +1,4 @@
+import { getPickPlayerName } from "@/lib/sleeper/pick-player";
 import { formatShortPickLabel } from "@/lib/sleeper/pick-label";
 import type { DraftRoomState, SleeperPick } from "@/types";
 
@@ -44,13 +45,6 @@ function playerEligibleForSlot(playerPosition: string, slot: string): boolean {
   return pos === slotUpper;
 }
 
-function pickPlayerName(pick: SleeperPick): string {
-  const first = pick.metadata.firstName ? String(pick.metadata.firstName) : "";
-  const last = pick.metadata.lastName ? String(pick.metadata.lastName) : "";
-  const name = `${first} ${last}`.trim();
-  return name || "Unknown";
-}
-
 export function getUserPicks(state: DraftRoomState, currentUserId?: string | null): SleeperPick[] {
   const { picks, userDraftSlot, userRosterId } = state;
 
@@ -77,7 +71,7 @@ export function buildUserRosterSlots(
     return userPicks.map((pick) => ({
       slotLabel: String(pick.metadata.position ?? "—"),
       pick,
-      playerName: pickPlayerName(pick),
+      playerName: getPickPlayerName(pick) ?? "Unknown",
       playerPosition: pick.metadata.position ? String(pick.metadata.position) : null,
       playerTeam: pick.metadata.team ? String(pick.metadata.team) : null,
       pickLabel: formatShortPickLabel(state.draft, pick.pickNo),
@@ -96,7 +90,7 @@ export function buildUserRosterSlots(
     return {
       slotLabel: formatSlotLabel(slot),
       pick,
-      playerName: pick ? pickPlayerName(pick) : null,
+      playerName: pick ? (getPickPlayerName(pick) ?? "Unknown") : null,
       playerPosition: pick?.metadata.position ? String(pick.metadata.position) : null,
       playerTeam: pick?.metadata.team ? String(pick.metadata.team) : null,
       pickLabel: pick ? formatShortPickLabel(state.draft, pick.pickNo) : null,

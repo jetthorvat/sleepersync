@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { Fragment, memo } from "react";
 import { Star } from "lucide-react";
 import { formatAdp, formatProjection, formatRank, formatTeamDetail } from "@/lib/sleeper/player-display";
 import { PANEL_INSET } from "@/components/draft-room/resizable-left-panel";
@@ -38,14 +38,14 @@ export const PlayerPoolList = memo(function PlayerPoolList({
           prevAdp < picksAwayInsertBeforeAdp;
 
         return (
-          <div key={player.playerId}>
+          <Fragment key={player.playerId}>
             {showDivider && <PicksAwayDivider label={picksAwayLabel} />}
             <PlayerRow
               player={player}
               queued={queuedIds.has(player.playerId)}
               onToggleQueue={onToggleQueue}
             />
-          </div>
+          </Fragment>
         );
       })}
     </div>
@@ -54,11 +54,11 @@ export const PlayerPoolList = memo(function PlayerPoolList({
 
 function PicksAwayDivider({ label }: { label: string }) {
   return (
-    <div className={cn(PLAYER_ROW_GRID, PANEL_INSET, "py-1.5")}>
-      <div className="col-span-full flex items-center gap-2">
-        <div className="h-px flex-1 bg-amber-400/40" />
+    <div className={cn("flex justify-center py-1", PANEL_INSET)}>
+      <div className="flex w-[min(14rem,72%)] items-center gap-2">
+        <div className="h-px flex-1 bg-amber-400/50" />
         <span className="shrink-0 text-[10px] font-medium text-amber-400/90">{label}</span>
-        <div className="h-px flex-1 bg-amber-400/40" />
+        <div className="h-px flex-1 bg-amber-400/50" />
       </div>
     </div>
   );
