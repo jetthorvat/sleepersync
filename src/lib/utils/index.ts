@@ -171,10 +171,10 @@ export function getPositionColorClass(position: string): string {
   return `${bg} ${text} ${border}`;
 }
 
-/** Filled pick cell styling — matches position tag colors exactly. */
+/** Filled pick cell styling — position border/background only; text uses standard foreground colors. */
 export function getPositionBoxClass(position: string): string {
-  const { bg, text, border } = getPositionStyleTokens(position);
-  return `border ${bg} ${border} ${text}`;
+  const { bg, border } = getPositionStyleTokens(position);
+  return `border ${bg} ${border}`;
 }
 
 export function snakePickNumber(
