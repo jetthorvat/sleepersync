@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import {
+  getSfb16LiveAdpSheetUrl,
   SFB16_LIVE_ADP_FALLBACK_PATH,
   SFB16_LIVE_ADP_REVALIDATE_SECONDS,
 } from "@/lib/rankings/sfb16-live-adp";
@@ -29,20 +30,33 @@ async function fetchSheetCsv(sheetUrl: string): Promise<string> {
 }
 
 export async function GET() {
-  const sheetUrl = process.env.SFB16_LIVE_ADP_SHEET_URL?.trim();
-  const source = sheetUrl ? "google_sheet" : "csv";
+  const sheetUrl = getSfb16LiveAdpSheetUrl();
 
   try {
-    const csv = sheetUrl ? await fetchSheetCsv(sheetUrl) : readBundledCsv();
+    const csv = await fetchSheetCsv(sheetUrl);
     return new NextResponse(csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Cache-Control": `public, s-maxage=${SFB16_LIVE_ADP_REVALIDATE_SECONDS}, stale-while-revalidate=60`,
-        "X-SFB16-Source": source,
+        "X-SFB16-Source": "google_sheet",
       },
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to load SFB16 live ADP.";
-    return NextResponse.json({ error: message }, { status: 502 });
+  } catch (sheetError) {
+    try {
+      const csv = readBundledCsv();
+      return new NextResponse(csv, {
+        headers: {
+          "Content-Type": "text/csv; charset=utf-8",
+          "Cache-Control": "public, s-maxage=3600",
+          "X-SFB16-Source": "csv",
+          "X-SFB16-Sheet-Error":
+            sheetError instanceof Error ? sheetError.message : "sheet_fetch_failed",
+        },
+      });
+    } catch {
+      const message =
+        sheetError instanceof Error ? sheetError.message : "Failed to load SFB16 live ADP.";
+      return NextResponse.json({ error: message }, { status: 502 });
+    }
   }
 }

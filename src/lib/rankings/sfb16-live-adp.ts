@@ -6,6 +6,15 @@ export const SFB16_LIVE_ADP_NAME = "SFB16 Live Drafts ADP";
 export const SFB16_LIVE_ADP_API_PATH = "/api/rankings/sfb16-live-adp";
 export const SFB16_LIVE_ADP_FALLBACK_PATH = "/data/sfb16-live-drafts-adp.csv";
 
+/** Live SFB16 ADP sheet — columns A (ADP) and B (Player). */
+export const SFB16_LIVE_ADP_DEFAULT_SHEET_URL =
+  "https://docs.google.com/spreadsheets/d/1Iu_5Z75Yarwj-1QqJlykYBIatazimCFhZsUl0VJx99Q/export?format=csv&gid=1432129336";
+
+export function getSfb16LiveAdpSheetUrl(): string {
+  const fromEnv = process.env.SFB16_LIVE_ADP_SHEET_URL?.trim();
+  return fromEnv || SFB16_LIVE_ADP_DEFAULT_SHEET_URL;
+}
+
 /** Server-side cache TTL when fetching the Google Sheet (seconds). */
 export const SFB16_LIVE_ADP_REVALIDATE_SECONDS = Number(
   process.env.SFB16_LIVE_ADP_REVALIDATE_SECONDS ?? 900,
