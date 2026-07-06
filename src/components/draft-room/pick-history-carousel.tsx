@@ -37,35 +37,16 @@ function PickTapeCard({ slot, draft }: { slot: PickTapeSlot; draft: DraftRoomSta
       data-current={slot.isCurrent ? "true" : undefined}
     >
       <div className="flex items-start justify-between gap-1">
-        <span
-          className={cn(
-            "font-mono text-[9px] leading-tight",
-            isPositionCoded ? "opacity-70" : "text-muted-foreground",
-          )}
-        >
+        <span className="font-mono text-[9px] leading-tight text-muted-foreground">
           {formatPickLabelFromDraft(draft, slot.pickNo)}
         </span>
       </div>
       {name ? (
-        <p className="truncate text-xs font-medium">{name}</p>
-      ) : (
-        <p
-          className={cn(
-            "truncate text-xs",
-            isPositionCoded ? "opacity-80" : "text-muted-foreground",
-          )}
-        >
-          {slot.isCurrent ? "Picking..." : "—"}
-        </p>
-      )}
-      <p
-        className={cn(
-          "truncate text-[10px]",
-          isPositionCoded ? "opacity-70" : "text-muted-foreground",
-        )}
-      >
-        {slot.managerName}
-      </p>
+        <p className="truncate text-xs font-medium text-foreground">{name}</p>
+      ) : slot.isCurrent ? (
+        <p className="truncate text-xs text-foreground">Picking...</p>
+      ) : null}
+      <p className="truncate text-[10px] text-muted-foreground">{slot.managerName}</p>
     </div>
   );
 }
@@ -90,30 +71,31 @@ export function PickHistoryCarousel({ state }: PickHistoryCarouselProps) {
 
   return (
     <div className="border-b border-border bg-surface-elevated">
-      <div className="space-y-0.5 px-3 py-2">
+      <div className="px-3 py-2">
         {isLive && (
           <p className="text-sm">
             <span className="font-semibold">{currentUsername}</span>
             <span className="text-muted-foreground"> is on the clock with </span>
             <span className="font-semibold text-pick-current">{currentPickLabel}</span>
-          </p>
-        )}
-        {isLive && userPickLabel && state.picksUntilUserTurn !== null && (
-          <p className="text-sm">
-            {state.picksUntilUserTurn === 0 ? (
+            {userPickLabel && state.picksUntilUserTurn !== null && (
               <>
-                <span className="text-muted-foreground">You are on the clock with </span>
-                <span className="font-semibold text-pick-user">{userPickLabel}</span>
-              </>
-            ) : (
-              <>
-                <span className="text-muted-foreground">You are up in </span>
-                <span className="font-semibold text-foreground">{state.picksUntilUserTurn}</span>
-                <span className="text-muted-foreground">
-                  {" "}
-                  pick{state.picksUntilUserTurn === 1 ? "" : "s"} with{" "}
-                </span>
-                <span className="font-semibold text-pick-user">{userPickLabel}</span>
+                <span className="text-muted-foreground">     |     </span>
+                {state.picksUntilUserTurn === 0 ? (
+                  <>
+                    <span className="text-muted-foreground">You are on the clock with </span>
+                    <span className="font-semibold text-pick-user">{userPickLabel}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-muted-foreground">You are up in </span>
+                    <span className="font-semibold text-foreground">{state.picksUntilUserTurn}</span>
+                    <span className="text-muted-foreground">
+                      {" "}
+                      pick{state.picksUntilUserTurn === 1 ? "" : "s"} with{" "}
+                    </span>
+                    <span className="font-semibold text-pick-user">{userPickLabel}</span>
+                  </>
+                )}
               </>
             )}
           </p>
