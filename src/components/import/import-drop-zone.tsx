@@ -176,9 +176,9 @@ export function ImportDropZone({
 
   const sfb16Label = importMeta
     ? isSfb16LiveAdpImport(importMeta.fileName)
-      ? "Refresh SFB16 Live Drafts ADP from Google Sheet"
-      : "Switch to SFB16 Live Drafts ADP"
-    : "Click here to use the SFB16 Live Drafts ADP";
+      ? "Refresh with live SFB16 ADPs"
+      : "Use live SFB16 ADPs"
+    : "Use live SFB16 ADPs";
 
   const hiddenPasteTarget = (
     <textarea
@@ -197,9 +197,7 @@ export function ImportDropZone({
   const headerRow = (
     <div className="grid grid-cols-3 gap-1.5">
       <div className="flex min-w-0 items-center gap-1">
-        <p className="truncate text-xs font-medium">
-          {importMeta ? "Current Rankings" : "Sleeper Default Rankings"}
-        </p>
+        <p className="truncate text-xs font-medium">Rankings</p>
         <ImportFormatHelp compact />
       </div>
       <button
@@ -228,6 +226,58 @@ export function ImportDropZone({
     </div>
   );
 
+  const activeRankingsRow = (textClass: string) =>
+    importMeta ? (
+      <div className="space-y-0.5">
+        <div className="flex min-w-0 items-center gap-1">
+          {isRenaming ? (
+            <input
+              autoFocus
+              value={editName}
+              onChange={(event) => setEditName(event.target.value)}
+              onBlur={() => void commitRename()}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") void commitRename();
+                if (event.key === "Escape") setIsRenaming(false);
+              }}
+              className={cn(
+                "min-w-0 flex-1 rounded border border-border bg-background px-1.5 py-0.5 font-medium outline-none focus:border-primary",
+                textClass,
+              )}
+            />
+          ) : (
+            <>
+              <p className={cn("min-w-0 flex-1 truncate font-medium", textClass)}>
+                {importMeta.fileName}
+              </p>
+              <button
+                type="button"
+                onClick={startRename}
+                className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground"
+                aria-label="Rename import"
+              >
+                <Pencil className={compact ? "h-3 w-3" : "h-3.5 w-3.5"} />
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleClearRankings()}
+                disabled={isImporting}
+                className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive disabled:opacity-50"
+                aria-label="Remove rankings and use Sleeper default"
+              >
+                <Trash2 className={compact ? "h-3 w-3" : "h-3.5 w-3.5"} />
+              </button>
+            </>
+          )}
+        </div>
+        <p className={cn("text-muted-foreground", compact ? "text-[10px]" : "text-xs")}>
+          Imported {formatImportTime(importMeta.importedAt)}
+        </p>
+      </div>
+    ) : (
+      <p className={cn("font-medium text-muted-foreground", textClass)}>Sleeper Default Rankings</p>
+    );
+
   if (compact) {
     return (
       <div className={cn("shrink-0 border-b border-border py-3", PANEL_INSET)}>
@@ -242,51 +292,7 @@ export function ImportDropZone({
           onPaste={handlePasteEvent}
         >
           {headerRow}
-          {importMeta && (
-            <div className="space-y-0.5">
-              <div className="flex min-w-0 items-center gap-1">
-                {isRenaming ? (
-                  <input
-                    autoFocus
-                    value={editName}
-                    onChange={(event) => setEditName(event.target.value)}
-                    onBlur={() => void commitRename()}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") void commitRename();
-                      if (event.key === "Escape") setIsRenaming(false);
-                    }}
-                    className="min-w-0 flex-1 rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium outline-none focus:border-primary"
-                  />
-                ) : (
-                  <>
-                    <p className="min-w-0 flex-1 truncate text-[10px] font-medium">
-                      {importMeta.fileName}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={startRename}
-                      className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground"
-                      aria-label="Rename import"
-                    >
-                      <Pencil className="h-3 w-3" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void handleClearRankings()}
-                      disabled={isImporting}
-                      className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive disabled:opacity-50"
-                      aria-label="Remove rankings and use Sleeper default"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  </>
-                )}
-              </div>
-              <p className="text-[10px] text-muted-foreground">
-                Imported {formatImportTime(importMeta.importedAt)}
-              </p>
-            </div>
-          )}
+          {activeRankingsRow("text-[10px]")}
           <button
             type="button"
             onClick={() => void handleSfb16LiveAdp()}
@@ -314,49 +320,7 @@ export function ImportDropZone({
       {hiddenPasteTarget}
       <div className="mx-auto w-full max-w-sm space-y-3 text-left">
         {headerRow}
-        {importMeta ? (
-          <div className="space-y-1">
-            <div className="flex min-w-0 items-center gap-1">
-              {isRenaming ? (
-                <input
-                  autoFocus
-                  value={editName}
-                  onChange={(event) => setEditName(event.target.value)}
-                  onBlur={() => void commitRename()}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") void commitRename();
-                    if (event.key === "Escape") setIsRenaming(false);
-                  }}
-                  className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-xs font-medium outline-none focus:border-primary"
-                />
-              ) : (
-                <>
-                  <p className="min-w-0 flex-1 truncate text-xs font-medium">{importMeta.fileName}</p>
-                  <button
-                    type="button"
-                    onClick={startRename}
-                    className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground"
-                    aria-label="Rename import"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleClearRankings()}
-                    disabled={isImporting}
-                    className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive disabled:opacity-50"
-                    aria-label="Remove rankings and use Sleeper default"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Imported {formatImportTime(importMeta.importedAt)}
-            </p>
-          </div>
-        ) : null}
+        {activeRankingsRow("text-xs")}
         <button
           type="button"
           onClick={() => void handleSfb16LiveAdp()}
