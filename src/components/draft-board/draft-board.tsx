@@ -2,7 +2,7 @@
 
 import { Fragment } from "react";
 import { getBoardSlots, getManagerName, getSlotManagerName } from "@/lib/sleeper/draft-room";
-import { getPickPlayerName } from "@/lib/sleeper/pick-player";
+import { getBoardPickPlayerName } from "@/lib/sleeper/pick-player";
 import { formatCompactBoardPickLabel, formatPickLabelFromDraft } from "@/lib/sleeper/pick-label";
 import { cn, getPositionBoxClass } from "@/lib/utils";
 import type { DraftRoomState, SleeperDraft, SleeperPick } from "@/types";
@@ -30,7 +30,7 @@ function PickCell({
   compact: boolean;
 }) {
   const hasPlayer = pick?.playerId;
-  const name = getPickPlayerName(pick);
+  const name = getBoardPickPlayerName(pick);
   const position = pick?.metadata.position ? String(pick.metadata.position) : null;
   const isPositionCoded = Boolean(hasPlayer && position);
 
