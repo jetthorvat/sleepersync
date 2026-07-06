@@ -130,7 +130,8 @@ export function DraftRoom({ draftId }: DraftRoomProps) {
     return enrichedPlayers.find((p) => !state.draftedPlayerIds.has(p.playerId)) ?? null;
   }, [enrichedPlayers, state]);
 
-  const isPolling = draft?.status === "drafting" || draft?.status === "paused";
+  const isPolling =
+    draft?.status === "pre_draft" || draft?.status === "drafting" || draft?.status === "paused";
   const enrichmentLoading = projectionsLoading || byeWeeksLoading;
 
   const handleRefresh = () => {
@@ -169,6 +170,7 @@ export function DraftRoom({ draftId }: DraftRoomProps) {
     onRemoveFromQueue: removeFromQueue,
     onImportComplete: refreshCustomRankings,
     draftState: state,
+    currentUserId,
     enrichmentMeta,
   };
 

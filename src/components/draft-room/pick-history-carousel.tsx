@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { buildPickTapeSlots } from "@/lib/sleeper/draft-room";
 import { formatPickLabelFromDraft } from "@/lib/sleeper/pick-label";
@@ -31,6 +32,7 @@ function PickTapeCard({ slot, draft }: { slot: PickTapeSlot; draft: DraftRoomSta
         hasPlayer && !slot.isCurrent && !slot.isUserSlot && "border-border bg-card",
         !hasPlayer && !slot.isCurrent && !slot.isUserSlot && "border-border/60 bg-surface/80",
       )}
+      data-current={slot.isCurrent ? "true" : undefined}
     >
       <div className="flex items-start justify-between gap-1">
         <span className="font-mono text-[9px] leading-tight text-muted-foreground">
@@ -61,6 +63,14 @@ function PickTapeCard({ slot, draft }: { slot: PickTapeSlot; draft: DraftRoomSta
 
 export function PickHistoryCarousel({ state }: PickHistoryCarouselProps) {
   const tapeSlots = buildPickTapeSlots(state);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = scrollRef.current?.parentElement;
+    const currentCard = scrollRef.current?.querySelector('[data-current="true"]');
+    if (!container || !currentCard) return;
+    currentCard.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [state.currentPickNo]);
 
   return (
     <div className="border-b border-border bg-surface-elevated">
@@ -92,7 +102,7 @@ export function PickHistoryCarousel({ state }: PickHistoryCarouselProps) {
         </div>
       </div>
       <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-2 px-3 pb-3">
+        <div ref={scrollRef} className="flex gap-2 px-3 pb-3">
           {tapeSlots.map((slot) => (
             <PickTapeCard key={slot.pickNo} slot={slot} draft={state.draft} />
           ))}

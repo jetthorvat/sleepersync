@@ -143,11 +143,8 @@ export interface PickTapeSlot {
   isUserSlot: boolean;
 }
 
-/** Build pick tape slots centered on current pick — upcoming + recent. */
-export function buildPickTapeSlots(
-  state: DraftRoomState,
-  windowSize = 14,
-): PickTapeSlot[] {
+/** Build pick tape slots for the full draft (pick 1 through last pick). */
+export function buildPickTapeSlots(state: DraftRoomState): PickTapeSlot[] {
   const { draft, picks, users, currentPickNo, userDraftSlot } = state;
   const picksByNo = new Map<number, SleeperPick>();
   for (const pick of picks) {
@@ -155,11 +152,9 @@ export function buildPickTapeSlots(
   }
 
   const totalPicks = draft.settings.teams * draft.settings.rounds;
-  const start = Math.max(1, currentPickNo - 2);
-  const end = Math.min(totalPicks, start + windowSize - 1);
 
   const slots: PickTapeSlot[] = [];
-  for (let pickNo = start; pickNo <= end; pickNo++) {
+  for (let pickNo = 1; pickNo <= totalPicks; pickNo++) {
     slots.push({
       pickNo,
       pick: picksByNo.get(pickNo) ?? null,

@@ -15,7 +15,7 @@ interface PlayerPoolListProps {
   players: EnrichedPlayer[];
   queuedIds: ReadonlySet<string>;
   onToggleQueue: (playerId: string) => void;
-  picksAwayInsertBeforeRank: number | null;
+  picksAwayInsertBeforeAdp: number | null;
   picksAwayLabel: string | null;
 }
 
@@ -23,17 +23,19 @@ export const PlayerPoolList = memo(function PlayerPoolList({
   players,
   queuedIds,
   onToggleQueue,
-  picksAwayInsertBeforeRank,
+  picksAwayInsertBeforeAdp,
   picksAwayLabel,
 }: PlayerPoolListProps) {
   return (
     <div className="divide-y divide-border">
       {players.map((player, index) => {
+        const playerAdp = player.adp ?? Number.POSITIVE_INFINITY;
+        const prevAdp = index > 0 ? (players[index - 1].adp ?? Number.NEGATIVE_INFINITY) : Number.NEGATIVE_INFINITY;
         const showDivider =
-          picksAwayInsertBeforeRank != null &&
+          picksAwayInsertBeforeAdp != null &&
           picksAwayLabel != null &&
-          player.rank >= picksAwayInsertBeforeRank &&
-          (index === 0 || players[index - 1].rank < picksAwayInsertBeforeRank);
+          playerAdp >= picksAwayInsertBeforeAdp &&
+          prevAdp < picksAwayInsertBeforeAdp;
 
         return (
           <div key={player.playerId}>
@@ -54,9 +56,9 @@ function PicksAwayDivider({ label }: { label: string }) {
   return (
     <div className={cn(PLAYER_ROW_GRID, PANEL_INSET, "py-1.5")}>
       <div className="col-span-full flex items-center gap-2">
-        <div className="h-px flex-1 bg-pick-user/30" />
-        <span className="shrink-0 text-[10px] font-medium text-pick-user/80">{label}</span>
-        <div className="h-px flex-1 bg-pick-user/30" />
+        <div className="h-px flex-1 bg-amber-400/40" />
+        <span className="shrink-0 text-[10px] font-medium text-amber-400/90">{label}</span>
+        <div className="h-px flex-1 bg-amber-400/40" />
       </div>
     </div>
   );

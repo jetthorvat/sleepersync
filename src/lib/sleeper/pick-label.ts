@@ -24,3 +24,9 @@ export function formatPickLabelFromDraft(draft: SleeperDraft, overallPick: numbe
   const { round, pickInRound } = getPickRoundInfo(draft, overallPick);
   return formatPickLabel(overallPick, round, pickInRound);
 }
+
+/** Compact round.pick label for roster rows, e.g. `2.11`. */
+export function formatShortPickLabel(draft: SleeperDraft, overallPick: number): string {
+  const { round, pickInRound } = getPickRoundInfo(draft, overallPick);
+  return `${round}.${String(pickInRound).padStart(2, "0")}`;
+}

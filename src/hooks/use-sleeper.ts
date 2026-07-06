@@ -39,21 +39,28 @@ export function useDiscoverDrafts(userId: string | null, season: string = DEFAUL
   });
 }
 
+const LIVE_DRAFT_POLL_MS = 5000;
+
+function isLiveDraftStatus(status: string | undefined): boolean {
+  return status === "pre_draft" || status === "drafting" || status === "paused";
+}
+
 export function useDraft(draftId: string) {
   return useQuery({
     queryKey: ["draft", draftId],
     queryFn: () => getDraft(draftId),
     enabled: !!draftId,
+    refetchInterval: (query) =>
+      isLiveDraftStatus(query.state.data?.status) ? LIVE_DRAFT_POLL_MS : false,
   });
 }
 
 export function useDraftPicks(draftId: string, status?: string) {
-  const isActive = status === "drafting" || status === "paused";
   return useQuery({
     queryKey: ["draftPicks", draftId],
     queryFn: () => getDraftPicks(draftId),
     enabled: !!draftId,
-    refetchInterval: isActive ? 5000 : false,
+    refetchInterval: isLiveDraftStatus(status) ? LIVE_DRAFT_POLL_MS : false,
   });
 }
 

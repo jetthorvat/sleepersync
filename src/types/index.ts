@@ -247,7 +247,7 @@ export interface UserPreferences {
 
 export type PlayerSortOption = "rank" | "adp" | "projection" | "value";
 export type SortDirection = "asc" | "desc";
-export type LeftPanelTab = "pool" | "queue";
+export type LeftPanelTab = "pool" | "queue" | "team";
 
 /** Where a displayed value originated — import wiring comes in a future pass. */
 export type ValueSource = "sleeper" | "import" | "none";

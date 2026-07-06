@@ -4,11 +4,11 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayerPanel } from "@/components/players/player-panel";
 import { QueuePanel } from "@/components/queue/queue-panel";
+import { TeamPanel } from "@/components/team/team-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDraftRoomStore } from "@/stores/draft-room-store";
 import type { DraftRoomState, EnrichedPlayer, QueuePlayer } from "@/types";
 import type { EnrichmentMeta } from "@/lib/sleeper/enrichment";
-import { summarizeRoster, summarizeScoring } from "@/lib/utils";
 
 interface MobileBottomSheetProps {
   draftId: string;
@@ -22,6 +22,7 @@ interface MobileBottomSheetProps {
   onRemoveFromQueue: (playerId: string) => void;
   onImportComplete?: () => void;
   draftState?: DraftRoomState | null;
+  currentUserId?: string | null;
   enrichmentMeta?: EnrichmentMeta | null;
 }
 
@@ -43,6 +44,7 @@ export function MobileBottomSheet({
   onRemoveFromQueue,
   onImportComplete,
   draftState,
+  currentUserId,
   enrichmentMeta,
 }: MobileBottomSheetProps) {
   const { mobileSheetState, mobileTab, setMobileSheetState, setMobileTab } = useDraftRoomStore();
@@ -120,8 +122,8 @@ export function MobileBottomSheet({
                 />
               </TabsContent>
 
-              <TabsContent value="team" className="mt-0 flex-1 overflow-auto p-4">
-                <TeamTab state={state} />
+              <TabsContent value="team" className="mt-0 min-h-0 flex-1 overflow-auto">
+                <TeamPanel state={state} currentUserId={currentUserId} compact />
               </TabsContent>
 
               <TabsContent value="settings" className="mt-0 flex-1 overflow-auto p-4">
@@ -132,30 +134,6 @@ export function MobileBottomSheet({
         )}
       </AnimatePresence>
     </motion.div>
-  );
-}
-
-function TeamTab({ state }: { state: DraftRoomState }) {
-  const league = state.league;
-  if (!league) {
-    return <p className="text-sm text-muted-foreground">League data unavailable</p>;
-  }
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-semibold">{league.name}</h3>
-        <p className="text-xs text-muted-foreground">{league.season} season · {league.totalRosters} teams</p>
-      </div>
-      <div>
-        <p className="text-xs font-medium text-muted-foreground">Scoring</p>
-        <p className="text-sm">{summarizeScoring(league.scoringSettings)}</p>
-      </div>
-      <div>
-        <p className="text-xs font-medium text-muted-foreground">Roster</p>
-        <p className="text-sm">{summarizeRoster(league.rosterPositions)}</p>
-      </div>
-    </div>
   );
 }
 

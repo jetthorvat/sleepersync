@@ -13,6 +13,9 @@ import { parseDelimitedImport, parseImportFile } from "@/lib/rankings/parse-impo
 import type { RankingSet } from "@/types";
 import { cn } from "@/lib/utils";
 
+const SFB16_LIVE_ADP_PATH = "/data/sfb16-live-drafts-adp.csv";
+const SFB16_LIVE_ADP_NAME = "SFB16 Live Drafts ADP";
+
 interface ImportDropZoneProps {
   draftId: string;
   compact?: boolean;
@@ -82,6 +85,25 @@ export function ImportDropZone({
     try {
       const parsed = await parseImportFile(file);
       await commitImport(file.name, "csv", parsed);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleSfb16LiveAdp = async () => {
+    setIsImporting(true);
+    setError(null);
+    try {
+      const response = await fetch(SFB16_LIVE_ADP_PATH);
+      if (!response.ok) {
+        setError("Could not load SFB16 live ADP data.");
+        return;
+      }
+      const text = await response.text();
+      const parsed = parseDelimitedImport(text);
+      await commitImport(SFB16_LIVE_ADP_NAME, "csv", parsed);
+    } catch {
+      setError("Could not load SFB16 live ADP data.");
     } finally {
       setIsImporting(false);
     }
@@ -172,6 +194,20 @@ export function ImportDropZone({
     </div>
   );
 
+  const sfb16Button = (
+    <button
+      type="button"
+      onClick={() => void handleSfb16LiveAdp()}
+      disabled={isImporting}
+      className={cn(
+        "text-left text-primary hover:underline disabled:opacity-50",
+        compact ? "text-[10px]" : "text-xs",
+      )}
+    >
+      Click here to use the SFB16 Live Drafts ADP
+    </button>
+  );
+
   const actionButtons = (
     <div className="flex shrink-0 items-center gap-2">
       <button
@@ -258,6 +294,7 @@ export function ImportDropZone({
                 CSV file or copied table — column order does not matter
               </p>
             )}
+            {!importMeta && sfb16Button}
             {errorMessage}
           </div>
           {actionButtons}
@@ -299,6 +336,7 @@ export function ImportDropZone({
             CSV export or a copied spreadsheet table. Headers are auto-detected — column order does
             not matter.
           </p>
+          <div className="mt-2">{sfb16Button}</div>
         </>
       )}
       <div className="mt-3">{actionButtons}</div>

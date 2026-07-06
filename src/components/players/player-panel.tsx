@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { ImportDropZone } from "@/components/import/import-drop-zone";
 import { QueuePanel } from "@/components/queue/queue-panel";
+import { TeamPanel } from "@/components/team/team-panel";
 import { PlayerPoolList, PLAYER_ROW_GRID } from "@/components/players/player-pool-list";
 import { PANEL_INSET } from "@/components/draft-room/resizable-left-panel";
 import { Input } from "@/components/ui/input";
@@ -40,9 +41,10 @@ interface PlayerPanelProps {
   onRemoveFromQueue: (playerId: string) => void;
   onImportComplete?: () => void;
   draftState?: DraftRoomState | null;
+  currentUserId?: string | null;
   enrichmentMeta?: EnrichmentMeta | null;
   hideTabs?: boolean;
-  activeTab?: "pool" | "queue";
+  activeTab?: "pool" | "queue" | "team";
 }
 
 export function PlayerPanel({
@@ -56,6 +58,7 @@ export function PlayerPanel({
   onRemoveFromQueue,
   onImportComplete,
   draftState,
+  currentUserId,
   enrichmentMeta,
   hideTabs = false,
   activeTab,
@@ -156,17 +159,17 @@ export function PlayerPanel({
   }, [players]);
 
   const picksAway = useMemo(() => {
-    if (!draftState) return { insertBeforeRank: null as number | null, label: null as string | null };
+    if (!draftState) return { insertBeforeAdp: null as number | null, label: null as string | null };
     const { draft, userNextPickNo, picksUntilUserTurn } = draftState;
     const isLive = draft.status === "drafting" || draft.status === "paused";
     if (!isLive || userNextPickNo == null || picksUntilUserTurn == null || picksUntilUserTurn <= 0) {
-      return { insertBeforeRank: null, label: null };
+      return { insertBeforeAdp: null, label: null };
     }
     const label =
       picksUntilUserTurn === 1
         ? "1 pick away"
         : `${picksUntilUserTurn} picks away`;
-    return { insertBeforeRank: userNextPickNo, label };
+    return { insertBeforeAdp: userNextPickNo, label };
   }, [draftState]);
 
   const queuedIds = useMemo(() => new Set(queue.map((q) => q.playerId)), [queue]);
@@ -211,6 +214,18 @@ export function PlayerPanel({
             >
               Queue{queue.length > 0 ? ` (${queue.length})` : ""}
             </button>
+            <button
+              type="button"
+              onClick={() => setLeftPanelTab("team")}
+              className={cn(
+                "flex-1 text-xs font-medium transition-colors",
+                tab === "team"
+                  ? "border-b-2 border-primary text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              Team
+            </button>
           </div>
         </div>
       )}
@@ -221,6 +236,12 @@ export function PlayerPanel({
           draftedPlayerIds={draftedPlayerIds}
           onRemove={onRemoveFromQueue}
         />
+      ) : tab === "team" ? (
+        draftState ? (
+          <TeamPanel state={draftState} currentUserId={currentUserId} compact />
+        ) : (
+          <p className="px-3 py-4 text-xs text-muted-foreground">Loading team…</p>
+        )
       ) : (
         <>
           <ImportDropZone
@@ -288,7 +309,7 @@ export function PlayerPanel({
                 players={displayPlayers}
                 queuedIds={queuedIds}
                 onToggleQueue={handleToggleQueueById}
-                picksAwayInsertBeforeRank={picksAway.insertBeforeRank}
+                picksAwayInsertBeforeAdp={picksAway.insertBeforeAdp}
                 picksAwayLabel={picksAway.label}
               />
             )}

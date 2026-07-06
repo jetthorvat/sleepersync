@@ -72,7 +72,8 @@ export function rowsToRankingPlayers(
 
       const rankStr = mapping.rank ? row[mapping.rank] : undefined;
       const adpStr = mapping.adp ? row[mapping.adp] : undefined;
-      const rank = rankStr ? parseInt(rankStr, 10) : adpStr ? parseInt(adpStr, 10) : index + 1;
+      const hasExplicitRank = !!(mapping.rank && rankStr?.trim());
+      const rank = hasExplicitRank ? parseInt(rankStr!, 10) : index + 1;
 
       const player: RankingPlayer = {
         id: crypto.randomUUID(),

@@ -54,7 +54,21 @@ export function parseDelimitedImport(text: string): ParseImportResult {
   const rows = result.data.filter((row) =>
     Object.values(row).some((value) => String(value ?? "").trim().length > 0),
   );
-  const players = rowsToRankingPlayers(rows, mapping).sort((a, b) => a.rank - b.rank);
+  let players = rowsToRankingPlayers(rows, mapping);
+  const isAdpOnly = !!mapping.adp && !mapping.rank;
+
+  if (isAdpOnly) {
+    players.sort((a, b) => {
+      const aAdp = a.adp ?? Number.POSITIVE_INFINITY;
+      const bAdp = b.adp ?? Number.POSITIVE_INFINITY;
+      if (aAdp !== bAdp) return aAdp - bAdp;
+      return a.playerName.localeCompare(b.playerName);
+    });
+  } else {
+    players.sort((a, b) => a.rank - b.rank);
+  }
+
+  players = players.map((player, index) => ({ ...player, rank: index + 1 }));
 
   if (players.length === 0) {
     return { error: "No player rows found after the header row." };

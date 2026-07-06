@@ -4,6 +4,26 @@ import { normalizePlayerName } from "@/lib/utils";
 export const CONFIDENCE_AUTO = 95;
 export const CONFIDENCE_REVIEW = 80;
 
+const FANTASY_MATCH_POSITIONS = new Set([
+  "QB",
+  "RB",
+  "WR",
+  "TE",
+  "K",
+  "DEF",
+  "DST",
+  "DL",
+  "LB",
+  "DB",
+  "IDP",
+]);
+
+function fantasyMatchScore(player: SleeperPlayer): number {
+  const pos = player.position?.toUpperCase() ?? "";
+  if (!FANTASY_MATCH_POSITIONS.has(pos)) return 1_000_000;
+  return player.searchRank ?? 500_000;
+}
+
 export interface MatchResult {
   match: PlayerMatch;
   candidates: PlayerMatch[];
@@ -71,7 +91,14 @@ export function matchImportedPlayer(
     }
   }
 
-  candidates.sort((a, b) => b.confidence - a.confidence);
+  candidates.sort((a, b) => {
+    if (b.confidence !== a.confidence) return b.confidence - a.confidence;
+    const playerA = sleeperPlayers.find((p) => p.playerId === a.sleeperPlayerId);
+    const playerB = sleeperPlayers.find((p) => p.playerId === b.sleeperPlayerId);
+    const scoreA = playerA ? fantasyMatchScore(playerA) : 1_000_000;
+    const scoreB = playerB ? fantasyMatchScore(playerB) : 1_000_000;
+    return scoreA - scoreB;
+  });
 
   if (candidates.length === 0) {
     return {
