@@ -2,13 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { buildPickTapeSlots } from "@/lib/sleeper/draft-room";
+import { buildPickTapeSlots, getUsernameForPickNo } from "@/lib/sleeper/draft-room";
 import { getPickPlayerName } from "@/lib/sleeper/pick-player";
-import { formatPickLabelFromDraft } from "@/lib/sleeper/pick-label";
-import { getPositionColorClass } from "@/lib/utils";
+import { formatPickLabelFromDraft, formatPrefixedPickLabelFromDraft } from "@/lib/sleeper/pick-label";
 import type { DraftRoomState } from "@/types";
 import type { PickTapeSlot } from "@/lib/sleeper/draft-room";
-import { cn } from "@/lib/utils";
+import { cn, getPositionBoxClass } from "@/lib/utils";
 
 interface PickHistoryCarouselProps {
   state: DraftRoomState;
@@ -19,41 +18,54 @@ function PickTapeCard({ slot, draft }: { slot: PickTapeSlot; draft: DraftRoomSta
   const hasPlayer = pick?.playerId;
   const name = getPickPlayerName(pick);
   const position = pick?.metadata.position ? String(pick.metadata.position) : null;
+  const isPositionCoded = Boolean(hasPlayer && position);
 
   return (
     <div
       className={cn(
         "flex min-w-[128px] shrink-0 flex-col gap-0.5 rounded-lg border px-2.5 py-2",
-        slot.isCurrent && "border-pick-current bg-pick-current/10 ring-1 ring-pick-current/40",
-        slot.isUserSlot && !slot.isCurrent && "border-pick-user/50 bg-pick-user/5 ring-1 ring-pick-user/25",
-        hasPlayer && !slot.isCurrent && !slot.isUserSlot && "border-border bg-card",
-        !hasPlayer && !slot.isCurrent && !slot.isUserSlot && "border-border/60 bg-surface/80",
+        isPositionCoded
+          ? getPositionBoxClass(position!)
+          : slot.isCurrent
+            ? "border-pick-current bg-pick-current/10 ring-1 ring-pick-current/40"
+            : slot.isUserSlot && !slot.isCurrent
+              ? "border-pick-user/50 bg-pick-user/5 ring-1 ring-pick-user/25"
+              : !hasPlayer && !slot.isCurrent && !slot.isUserSlot
+                ? "border-border/60 bg-surface/80"
+                : "border-border bg-card",
       )}
       data-current={slot.isCurrent ? "true" : undefined}
     >
       <div className="flex items-start justify-between gap-1">
-        <span className="font-mono text-[9px] leading-tight text-muted-foreground">
+        <span
+          className={cn(
+            "font-mono text-[9px] leading-tight",
+            isPositionCoded ? "opacity-70" : "text-muted-foreground",
+          )}
+        >
           {formatPickLabelFromDraft(draft, slot.pickNo)}
         </span>
-        {position && (
-          <span
-            className={cn(
-              "shrink-0 rounded border px-1 py-0 text-[9px] font-medium",
-              getPositionColorClass(position),
-            )}
-          >
-            {position}
-          </span>
-        )}
       </div>
       {name ? (
         <p className="truncate text-xs font-medium">{name}</p>
       ) : (
-        <p className="truncate text-xs text-muted-foreground">
-          {slot.isCurrent ? "On the clock" : "—"}
+        <p
+          className={cn(
+            "truncate text-xs",
+            isPositionCoded ? "opacity-80" : "text-muted-foreground",
+          )}
+        >
+          {slot.isCurrent ? "Picking..." : "—"}
         </p>
       )}
-      <p className="truncate text-[10px] text-muted-foreground">{slot.managerName}</p>
+      <p
+        className={cn(
+          "truncate text-[10px]",
+          isPositionCoded ? "opacity-70" : "text-muted-foreground",
+        )}
+      >
+        {slot.managerName}
+      </p>
     </div>
   );
 }
@@ -61,6 +73,13 @@ function PickTapeCard({ slot, draft }: { slot: PickTapeSlot; draft: DraftRoomSta
 export function PickHistoryCarousel({ state }: PickHistoryCarouselProps) {
   const tapeSlots = buildPickTapeSlots(state);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isLive = state.draft.status === "drafting" || state.draft.status === "paused";
+  const currentUsername = getUsernameForPickNo(state.currentPickNo, state.draft, state.users);
+  const currentPickLabel = formatPrefixedPickLabelFromDraft(state.draft, state.currentPickNo);
+  const userPickLabel =
+    state.userNextPickNo != null
+      ? formatPrefixedPickLabelFromDraft(state.draft, state.userNextPickNo)
+      : null;
 
   useEffect(() => {
     const container = scrollRef.current?.parentElement;
@@ -71,32 +90,34 @@ export function PickHistoryCarousel({ state }: PickHistoryCarouselProps) {
 
   return (
     <div className="border-b border-border bg-surface-elevated">
-      <div className="flex h-10 items-center justify-between px-3">
-        <div className="flex items-center gap-4 text-sm">
-          <div>
-            <span className="text-muted-foreground">Current </span>
-            <span className="font-semibold text-pick-current">
-              {formatPickLabelFromDraft(state.draft, state.currentPickNo)}
-            </span>
-          </div>
-          {state.userNextPickNo && (
-            <div>
-              <span className="text-muted-foreground">Your next </span>
-              <span className="font-semibold text-pick-user">
-                {formatPickLabelFromDraft(state.draft, state.userNextPickNo)}
-              </span>
-            </div>
-          )}
-          {state.picksUntilUserTurn !== null && state.picksUntilUserTurn > 0 && (
-            <div className="text-muted-foreground">
-              You pick in{" "}
-              <span className="font-medium text-foreground">{state.picksUntilUserTurn}</span> picks
-            </div>
-          )}
-        </div>
-        <div className="text-xs text-muted-foreground">
-          Round {state.currentRound} · {state.draft.settings.teams} teams
-        </div>
+      <div className="space-y-0.5 px-3 py-2">
+        {isLive && (
+          <p className="text-sm">
+            <span className="font-semibold">{currentUsername}</span>
+            <span className="text-muted-foreground"> is on the clock with </span>
+            <span className="font-semibold text-pick-current">{currentPickLabel}</span>
+          </p>
+        )}
+        {isLive && userPickLabel && state.picksUntilUserTurn !== null && (
+          <p className="text-sm">
+            {state.picksUntilUserTurn === 0 ? (
+              <>
+                <span className="text-muted-foreground">You are on the clock with </span>
+                <span className="font-semibold text-pick-user">{userPickLabel}</span>
+              </>
+            ) : (
+              <>
+                <span className="text-muted-foreground">You are up in </span>
+                <span className="font-semibold text-foreground">{state.picksUntilUserTurn}</span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  pick{state.picksUntilUserTurn === 1 ? "" : "s"} with{" "}
+                </span>
+                <span className="font-semibold text-pick-user">{userPickLabel}</span>
+              </>
+            )}
+          </p>
+        )}
       </div>
       <ScrollArea className="w-full whitespace-nowrap">
         <div ref={scrollRef} className="flex gap-2 px-3 pb-3 pt-1">

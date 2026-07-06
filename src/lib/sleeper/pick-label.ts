@@ -25,6 +25,14 @@ export function formatPickLabelFromDraft(draft: SleeperDraft, overallPick: numbe
   return formatPickLabel(overallPick, round, pickInRound);
 }
 
+/** e.g. `Pick #1 | 1.01` — for draft room status headers. */
+export function formatPrefixedPickLabelFromDraft(
+  draft: SleeperDraft,
+  overallPick: number,
+): string {
+  return `Pick ${formatPickLabelFromDraft(draft, overallPick)}`;
+}
+
 /** Compact round.pick label for roster rows, e.g. `2.11`. */
 export function formatShortPickLabel(draft: SleeperDraft, overallPick: number): string {
   const { round, pickInRound } = getPickRoundInfo(draft, overallPick);

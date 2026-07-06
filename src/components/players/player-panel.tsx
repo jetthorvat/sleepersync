@@ -59,7 +59,6 @@ export function PlayerPanel({
   onImportComplete,
   draftState,
   currentUserId,
-  enrichmentMeta,
   hideTabs = false,
   activeTab,
 }: PlayerPanelProps) {
@@ -188,15 +187,15 @@ export function PlayerPanel({
   return (
     <div className="flex h-full min-h-0 flex-col">
       {!hideTabs && (
-        <div className={cn("flex h-10 shrink-0 items-center border-b border-border", PANEL_INSET)}>
-          <div className="flex w-full">
+        <div className={cn("shrink-0 border-b border-border py-2", PANEL_INSET)}>
+          <div className="flex rounded-lg bg-muted/50 p-0.5 shadow-inner">
             <button
               type="button"
               onClick={() => setLeftPanelTab("pool")}
               className={cn(
-                "flex-1 text-xs font-medium transition-colors",
+                "flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all",
                 tab === "pool"
-                  ? "border-b-2 border-primary text-foreground"
+                  ? "bg-card text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -206,9 +205,9 @@ export function PlayerPanel({
               type="button"
               onClick={() => setLeftPanelTab("queue")}
               className={cn(
-                "flex-1 text-xs font-medium transition-colors",
+                "flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all",
                 tab === "queue"
-                  ? "border-b-2 border-primary text-foreground"
+                  ? "bg-card text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -218,9 +217,9 @@ export function PlayerPanel({
               type="button"
               onClick={() => setLeftPanelTab("team")}
               className={cn(
-                "flex-1 text-xs font-medium transition-colors",
+                "flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all",
                 tab === "team"
-                  ? "border-b-2 border-primary text-foreground"
+                  ? "bg-card text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -285,11 +284,6 @@ export function PlayerPanel({
                   );
                 })}
               </div>
-            )}
-            {enrichmentMeta && (
-              <p className="text-[10px] text-muted-foreground/70">
-                {enrichmentMeta.adpLabel} · {enrichmentMeta.projectionLabel}
-              </p>
             )}
           </div>
 

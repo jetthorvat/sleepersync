@@ -287,7 +287,10 @@ export function ImportDropZone({
               <>
                 {renameControl}
                 <p className="text-[10px] text-muted-foreground">
-                  Imported {formatImportTime(importMeta.importedAt)} · drop or paste to replace
+                  Imported {formatImportTime(importMeta.importedAt)}
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  Drop or paste new rankings/projections to replace
                 </p>
               </>
             ) : (
@@ -326,8 +329,8 @@ export function ImportDropZone({
           <p className="mt-1 text-xs text-muted-foreground">
             Imported {formatImportTime(importMeta.importedAt)}
           </p>
-          <p className="mt-2 max-w-[280px] text-xs text-muted-foreground">
-            Drop or paste a new file to replace these rankings.
+          <p className="mt-1 max-w-[280px] text-xs text-muted-foreground">
+            Drop or paste new rankings/projections to replace
           </p>
         </>
       ) : (

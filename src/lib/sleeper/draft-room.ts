@@ -135,6 +135,22 @@ export function getManagerForPickNo(
   return getSlotManagerName(slot, draft, users);
 }
 
+export function getUsernameForPickNo(
+  pickNo: number,
+  draft: SleeperDraft,
+  users: SleeperUser[],
+): string {
+  const slot = getPickSlot(draft, pickNo);
+  if (draft.draftOrder) {
+    const entry = Object.entries(draft.draftOrder).find(([, s]) => s === slot);
+    if (entry) {
+      const user = users.find((u) => u.userId === entry[0]);
+      if (user) return user.username || user.displayName;
+    }
+  }
+  return `team${slot}`;
+}
+
 export interface PickTapeSlot {
   pickNo: number;
   pick: SleeperPick | null;

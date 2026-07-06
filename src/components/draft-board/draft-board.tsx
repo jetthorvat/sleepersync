@@ -4,9 +4,8 @@ import { Fragment } from "react";
 import { getBoardSlots, getManagerName, getSlotManagerName } from "@/lib/sleeper/draft-room";
 import { getPickPlayerName } from "@/lib/sleeper/pick-player";
 import { formatCompactBoardPickLabel, formatPickLabelFromDraft } from "@/lib/sleeper/pick-label";
-import { getPositionColorClass } from "@/lib/utils";
+import { cn, getPositionBoxClass } from "@/lib/utils";
 import type { DraftRoomState, SleeperDraft, SleeperPick } from "@/types";
-import { cn } from "@/lib/utils";
 
 interface DraftBoardProps {
   state: DraftRoomState;
@@ -33,22 +32,29 @@ function PickCell({
   const hasPlayer = pick?.playerId;
   const name = getPickPlayerName(pick);
   const position = pick?.metadata.position ? String(pick.metadata.position) : null;
+  const isPositionCoded = Boolean(hasPlayer && position);
 
   return (
     <div
       className={cn(
         "flex flex-col justify-between rounded-md border transition-colors",
         compact ? "min-h-[52px] p-1 text-[10px]" : "min-h-[76px] p-2 text-xs",
-        isCurrent && "border-pick-current bg-pick-current/10 ring-1 ring-pick-current/50",
-        isUserPick && !isCurrent && "border-pick-user/50 bg-pick-user/5 ring-1 ring-pick-user/30",
-        hasPlayer && !isCurrent && "border-border bg-card",
-        !hasPlayer && !isCurrent && "border-border/50 bg-surface",
+        isPositionCoded
+          ? getPositionBoxClass(position!)
+          : isCurrent
+            ? "border-pick-current bg-pick-current/10 ring-1 ring-pick-current/50"
+            : isUserPick && !isCurrent
+              ? "border-pick-user/50 bg-pick-user/5 ring-1 ring-pick-user/30"
+              : !hasPlayer && !isCurrent
+                ? "border-border/50 bg-surface"
+                : "border-border bg-card",
       )}
     >
       <div className="flex items-start justify-between gap-0.5">
         <span
           className={cn(
-            "font-mono leading-tight text-muted-foreground",
+            "font-mono leading-tight",
+            isPositionCoded ? "opacity-70" : "text-muted-foreground",
             compact ? "text-[7px]" : "text-[9px]",
           )}
         >
@@ -56,26 +62,30 @@ function PickCell({
             ? formatCompactBoardPickLabel(draft, pickNo)
             : formatPickLabelFromDraft(draft, pickNo)}
         </span>
-        {position && (
-          <span
-            className={cn(
-              "shrink-0 rounded border px-0.5 py-0 font-medium",
-              compact ? "text-[7px]" : "text-[9px]",
-              getPositionColorClass(position),
-            )}
-          >
-            {position}
-          </span>
-        )}
       </div>
       {name ? (
         <p className={cn("truncate font-medium leading-tight", compact && "text-[9px]")}>{name}</p>
       ) : (
-        <p className={cn("truncate text-muted-foreground", compact && "text-[9px]")}>
-          {isCurrent ? "On clock" : "—"}
+        <p
+          className={cn(
+            "truncate",
+            isPositionCoded ? "opacity-80" : "text-muted-foreground",
+            compact && "text-[9px]",
+          )}
+        >
+          {isCurrent ? "Picking..." : "—"}
         </p>
       )}
-      {!compact && <p className="truncate text-[10px] text-muted-foreground">{managerName}</p>}
+      {!compact && (
+        <p
+          className={cn(
+            "truncate text-[10px]",
+            isPositionCoded ? "opacity-70" : "text-muted-foreground",
+          )}
+        >
+          {managerName}
+        </p>
+      )}
     </div>
   );
 }
