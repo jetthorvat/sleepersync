@@ -135,31 +135,46 @@ export function getPositionFilterClass(position: string, selected: boolean): str
   }
 }
 
-export function getPositionColorClass(position: string): string {
+function getPositionStyleTokens(position: string): {
+  bg: string;
+  text: string;
+  border: string;
+} {
   switch (position?.toUpperCase()) {
     case "QB":
-      return "bg-pos-qb/20 text-purple-300 border-pos-qb/30";
+      return { bg: "bg-pos-qb/20", text: "text-purple-300", border: "border-pos-qb/30" };
     case "RB":
-      return "bg-pos-rb/20 text-emerald-300 border-pos-rb/30";
+      return { bg: "bg-pos-rb/20", text: "text-emerald-300", border: "border-pos-rb/30" };
     case "WR":
-      return "bg-pos-wr/20 text-blue-300 border-pos-wr/30";
+      return { bg: "bg-pos-wr/20", text: "text-blue-300", border: "border-pos-wr/30" };
     case "TE":
-      return "bg-pos-te/20 text-amber-300 border-pos-te/30";
+      return { bg: "bg-pos-te/20", text: "text-amber-300", border: "border-pos-te/30" };
     case "K":
-      return "bg-pos-k/20 text-slate-300 border-pos-k/30";
+      return { bg: "bg-pos-k/20", text: "text-slate-300", border: "border-pos-k/30" };
     case "DEF":
     case "DST":
-      return "bg-pos-dst/20 text-slate-400 border-pos-dst/30";
+      return { bg: "bg-pos-dst/20", text: "text-slate-400", border: "border-pos-dst/30" };
     case "SF":
     case "SUPER_FLEX":
-      return "bg-pos-sf/20 text-pink-300 border-pos-sf/30";
+      return { bg: "bg-pos-sf/20", text: "text-pink-300", border: "border-pos-sf/30" };
     case "DL":
     case "LB":
     case "DB":
-      return "bg-pos-idp/20 text-lime-300 border-pos-idp/30";
+      return { bg: "bg-pos-idp/20", text: "text-lime-300", border: "border-pos-idp/30" };
     default:
-      return "bg-pos-flex/20 text-cyan-300 border-pos-flex/30";
+      return { bg: "bg-pos-flex/20", text: "text-cyan-300", border: "border-pos-flex/30" };
   }
+}
+
+export function getPositionColorClass(position: string): string {
+  const { bg, text, border } = getPositionStyleTokens(position);
+  return `${bg} ${text} ${border}`;
+}
+
+/** Filled pick cell styling — matches position tag colors exactly. */
+export function getPositionBoxClass(position: string): string {
+  const { bg, text, border } = getPositionStyleTokens(position);
+  return `border ${bg} ${border} ${text}`;
 }
 
 export function snakePickNumber(
