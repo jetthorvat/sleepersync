@@ -54,6 +54,7 @@ function PickTapeCard({ slot, draft }: { slot: PickTapeSlot; draft: DraftRoomSta
 export function PickHistoryCarousel({ state }: PickHistoryCarouselProps) {
   const tapeSlots = buildPickTapeSlots(state);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const hasScrolledRef = useRef(false);
   const isLive = state.draft.status === "drafting" || state.draft.status === "paused";
   const currentUsername = getUsernameForPickNo(state.currentPickNo, state.draft, state.users);
   const currentPickLabel = formatPrefixedPickLabelFromDraft(state.draft, state.currentPickNo);
@@ -63,11 +64,25 @@ export function PickHistoryCarousel({ state }: PickHistoryCarouselProps) {
       : null;
 
   useEffect(() => {
-    const container = scrollRef.current?.parentElement;
-    const currentCard = scrollRef.current?.querySelector('[data-current="true"]');
-    if (!container || !currentCard) return;
-    currentCard.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  }, [state.currentPickNo]);
+    hasScrolledRef.current = false;
+  }, [state.draft.draftId]);
+
+  useEffect(() => {
+    const scrollToCurrentPick = () => {
+      const viewport = scrollRef.current?.parentElement;
+      const currentCard = scrollRef.current?.querySelector<HTMLElement>('[data-current="true"]');
+      if (!viewport || !currentCard) return;
+
+      currentCard.scrollIntoView({
+        behavior: hasScrolledRef.current ? "smooth" : "instant",
+        inline: "start",
+        block: "nearest",
+      });
+      hasScrolledRef.current = true;
+    };
+
+    requestAnimationFrame(scrollToCurrentPick);
+  }, [state.currentPickNo, tapeSlots.length]);
 
   return (
     <div className="border-b border-border bg-surface-elevated">
