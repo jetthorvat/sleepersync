@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, memo } from "react";
+import { Fragment, memo, useEffect, useRef } from "react";
 import { Star } from "lucide-react";
 import { formatAdp, formatProjection, formatRank, formatTeamDetail } from "@/lib/sleeper/player-display";
 import { PANEL_INSET } from "@/components/draft-room/resizable-left-panel";
@@ -15,31 +15,35 @@ interface PlayerPoolListProps {
   players: EnrichedPlayer[];
   queuedIds: ReadonlySet<string>;
   onToggleQueue: (playerId: string) => void;
-  picksAwayInsertBeforeAdp: number | null;
+  picksAwayInsertBeforePlayerId: string | null;
   picksAwayLabel: string | null;
+  scrollPicksAwayIntoView?: boolean;
 }
 
 export const PlayerPoolList = memo(function PlayerPoolList({
   players,
   queuedIds,
   onToggleQueue,
-  picksAwayInsertBeforeAdp,
+  picksAwayInsertBeforePlayerId,
   picksAwayLabel,
+  scrollPicksAwayIntoView = false,
 }: PlayerPoolListProps) {
   return (
     <div className="divide-y divide-border">
-      {players.map((player, index) => {
-        const playerAdp = player.adp ?? Number.POSITIVE_INFINITY;
-        const prevAdp = index > 0 ? (players[index - 1].adp ?? Number.NEGATIVE_INFINITY) : Number.NEGATIVE_INFINITY;
+      {players.map((player) => {
         const showDivider =
-          picksAwayInsertBeforeAdp != null &&
+          picksAwayInsertBeforePlayerId != null &&
           picksAwayLabel != null &&
-          playerAdp >= picksAwayInsertBeforeAdp &&
-          prevAdp < picksAwayInsertBeforeAdp;
+          player.playerId === picksAwayInsertBeforePlayerId;
 
         return (
           <Fragment key={player.playerId}>
-            {showDivider && <PicksAwayDivider label={picksAwayLabel} />}
+            {showDivider && (
+              <PicksAwayDivider
+                label={picksAwayLabel}
+                scrollIntoView={scrollPicksAwayIntoView}
+              />
+            )}
             <PlayerRow
               player={player}
               queued={queuedIds.has(player.playerId)}
@@ -52,9 +56,22 @@ export const PlayerPoolList = memo(function PlayerPoolList({
   );
 });
 
-function PicksAwayDivider({ label }: { label: string }) {
+function PicksAwayDivider({
+  label,
+  scrollIntoView = false,
+}: {
+  label: string;
+  scrollIntoView?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!scrollIntoView || !ref.current) return;
+    ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [label, scrollIntoView]);
+
   return (
-    <div className={cn("flex justify-center py-1", PANEL_INSET)}>
+    <div ref={ref} className={cn("flex justify-center py-1", PANEL_INSET)}>
       <div className="flex w-[min(14rem,72%)] items-center gap-2">
         <div className="h-px flex-1 bg-amber-400/50" />
         <span className="shrink-0 text-[10px] font-medium text-amber-400/90">{label}</span>

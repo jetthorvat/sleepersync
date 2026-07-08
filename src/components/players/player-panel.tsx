@@ -158,18 +158,23 @@ export function PlayerPanel({
   }, [players]);
 
   const picksAway = useMemo(() => {
-    if (!draftState) return { insertBeforeAdp: null as number | null, label: null as string | null };
+    if (!draftState) {
+      return { insertBeforePlayerId: null as string | null, label: null as string | null };
+    }
     const { draft, userNextPickNo, picksUntilUserTurn } = draftState;
     const isLive = draft.status === "drafting" || draft.status === "paused";
     if (!isLive || userNextPickNo == null || picksUntilUserTurn == null || picksUntilUserTurn <= 0) {
-      return { insertBeforeAdp: null, label: null };
+      return { insertBeforePlayerId: null, label: null };
     }
     const label =
       picksUntilUserTurn === 1
         ? "1 pick away"
         : `${picksUntilUserTurn} picks away`;
-    return { insertBeforeAdp: userNextPickNo, label };
-  }, [draftState]);
+    const insertBeforePlayer = displayPlayers.find(
+      (player) => (player.adp ?? Number.POSITIVE_INFINITY) >= userNextPickNo,
+    );
+    return { insertBeforePlayerId: insertBeforePlayer?.playerId ?? null, label };
+  }, [draftState, displayPlayers]);
 
   const queuedIds = useMemo(() => new Set(queue.map((q) => q.playerId)), [queue]);
 
@@ -315,8 +320,9 @@ export function PlayerPanel({
                 players={displayPlayers}
                 queuedIds={queuedIds}
                 onToggleQueue={handleToggleQueueById}
-                picksAwayInsertBeforeAdp={picksAway.insertBeforeAdp}
+                picksAwayInsertBeforePlayerId={picksAway.insertBeforePlayerId}
                 picksAwayLabel={picksAway.label}
+                scrollPicksAwayIntoView={hideTabs}
               />
             )}
           </ScrollArea>
